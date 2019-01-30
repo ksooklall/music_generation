@@ -1,0 +1,29 @@
+Getting Data:
+
+Download as a mp3, wav file (Audio only)
+Python uses wav files
+	youtube-dl -f bestaudio --extract-audio --audio-format mp3 --audio-quality 0 <Video-URL>
+	youtube-dl -f bestaudio --extract-audio --audio-format wav --audio-quality 0 <Video-URL>
+
+Pretrained models:
+	https://github.com/hindupuravinash/the-gan-zoo
+
+Evaluate output:
+	Play in terminal aplay <AUDIO-FILE>
+
+Start with:
+For classification of music into labels
+	https://www.analyticsvidhya.com/blog/2017/08/audio-voice-processing-deep-learning/
+
+Open Source:
+	https://github.com/chrisdonahue/wavegan
+	https://magenta.tensorflow.org/
+
+Siraj Raval:
+AI for Music Composition
+https://www.youtube.com/watch?v=NS2eqVsnJKo
+
+Currently working off this:
+	https://github.com/usernaamee/audio-GAN/blob/master/simple-audio-GAN.py
+try building to:
+	https://github.com/HackerPoet/Composer
