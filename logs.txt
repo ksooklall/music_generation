@@ -1,1 +1,2 @@
-Begin logs
+log,date,note
+1,2019-01-29,pushed to first untested model to github

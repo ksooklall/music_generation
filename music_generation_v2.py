@@ -1,63 +1,53 @@
 import keras
+from keras import backend as K
 from keras.utils import plot_model
+from util import get_audio
+from keras.layers.normalization import BatchNormalization
+from keras.layers import Input, Dense, Activation, TimeDistributed, Dropout, Reshape, Flatten
 
 PARAM_SIZE = 120
 DROPOUT=0.1
-MAX_LENGTH=16
-
-def model(y):
-	x_in = Input(shape=y_shape[1:])
-	x = Reshape((y_shape[1:], -1))(x_in)
-	x = TimeDistributed(Dense(2000, activation='relu'))(x)
-	x = TimeDistributed(Dense(200, activation='relu'))(x)
-	x = Flatten()(x)
-	x = Dense(1600, activation='relu')(x)
-	x = Dense(120)(x)
-	x = BatchNormalization(momentum=BN_M, name='pre_encoder')(x)
-	x = Dense(1600, name='encoder')(x)
-	x = BatchNormalization(momentum=BN_M)(x)
-	x = Activation('relu')(x)
-	x = Dropout(DROPOUT)(x)
-
-	x = DENSE(MAX_LENGTH * 200)(x)
-	x = Reshape((MAX_LENGTH, 200))(x) #193
-	x = TimeDistributed(BatchNormalization(momentum=BN_M))(x)
-	x = Activation('relu')(x)
-	x = Dropout(DROPOUT)(x) # 197
-
-	x = TimeDistributed(Dense(2000))(x)
-	x = TimeDistributed(BatchNormalization(momentum=BN_M))(x)
-	x = Activation('relu')(x)
-	x = Dropout(DROPOUT)(x) #204
-
-	x = TimeDistributed(Dense(y_shape[2] * y_shape[3], activation='sigmoid'))(x)
-	x = Reshape((y_shape[1], y_shape[2], y_shape[3]))(x) #209
-
-	model = Model(x_in, x)
-
-return model
-
-def normalize(X):
-        return (X - X.min()) / (X.max() - X.min())
+MAX_LENGTH=7
+BN_M=0.9
 
 
-def get_audio(fn):
-        sr, sd = read(fn)
-        sd  = normalize(sd)
-        return sr, sd
+def autoencoder(X):
+	net_in = Input(shape=X.shape[1:])
+	#net = Reshape((X.shape[1:], -1))(net_in)
+	net = Dense(2000, activation='relu')(net_in)
+	import pdb; pdb.set_trace()
+	net = Dense(200, activation='relu')(net)
+	net = Flatten()(net)
+	net = Dense(1600, activation='relu')(net)
+	net = Dense(120)(net)
+	net = BatchNormalization(momentum=BN_M, name='pre_encoder')(net)
+	net = Dense(1600, name='encoder')(net)
+	net = BatchNormalization(momentum=BN_M)(net)
+	net = Activation('relu')(net)
+	net = Dropout(DROPOUT)(net)
 
-def get_training_data(fn, f_size, f_shift):
-        # f_size -> batch_size
-        sr, sd = get_audio(fn)
-        X_train = []
-        base = 0
-        n = int((len(sd) - f_size) / float(f_shift))
-        while len(X_train) < 10000:
-                X_train.append(sd[base: base+f_size])
-                base += f_shift
-        X_train = np.array(X_train)
-        return sr, X_train
+	net = DENSE(MAX_LENGTH * 200)(net)
+	net = Reshape((MAX_LENGTH, 200))(net) #193
+	net = BatchNormalization(momentum=BN_M)(net)
+	net = Activation('relu')(net)
+	net = Dropout(DROPOUT)(net) # 197
 
+	net = Dense(2000)(net)
+	net = BatchNormalization(momentum=BN_M)(net)
+	net = Activation('relu')(net)
+	net = Dropout(DROPOUT)(net) #204
+
+	net = Dense(X.shape[2] * X.shape[3], activation='sigmoid')(net)
+	net = Reshape((X.shape[1], X.shape[2], X.shape[3]))(net) #209
+
+	model = Model(net_in, x)
+
+	return model
+
+rate, data = get_audio('/home/ksooklall/Music/wav/intro_x.wav') 
+X = data.reshape(-1, MAX_LENGTH)
+
+model = autoencoder(X)
 model.compile(optimizer=RMSprop(lr=LR), loss='binary_crossentropy')
 plot_model(model, to_file='model.png', show_shapes=True)
 history = model.fit(y_train, y_train, batch_size=BATCH_SIZE, epochs=1)

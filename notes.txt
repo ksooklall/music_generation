@@ -11,9 +11,14 @@ Pretrained models:
 Evaluate output:
 	Play in terminal aplay <AUDIO-FILE>
 
+Explaining keras inputs:
+	https://stackoverflow.com/questions/44747343/keras-input-explanation-input-shape-units-batch-size-dim-etc	
+
 Start with:
 For classification of music into labels
 	https://www.analyticsvidhya.com/blog/2017/08/audio-voice-processing-deep-learning/
+
+******** Try taking a look at DLND on how to generate new episodes
 
 Open Source:
 	https://github.com/chrisdonahue/wavegan
