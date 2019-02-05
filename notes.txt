@@ -29,6 +29,7 @@ AI for Music Composition
 https://www.youtube.com/watch?v=NS2eqVsnJKo
 
 Currently working off this:
-	https://github.com/usernaamee/audio-GAN/blob/master/simple-audio-GAN.py
+	https://github.com/usernaamee/audio-GAN/blob/master/simple-audio-GAN.py --x
+	https://blog.keras.io/building-autoencoders-in-keras.html
 try building to:
 	https://github.com/HackerPoet/Composer
