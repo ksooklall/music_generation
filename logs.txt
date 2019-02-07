@@ -2,3 +2,4 @@ log,date,note
 1,2019-01-29,pushed to first untested model to github
 2,2019-01-31,create vae model, need to fine tune and test each epoch
 3,2019-02-04,fixed loss function in vae, need to check results each X epochs
+4,2019-02-07,infastrcutre complete for 1d wav file, model doesn't produce anything good, try 2d

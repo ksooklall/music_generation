@@ -1,10 +1,9 @@
 import pandas as pd
 import numpy as np
-
-from util import normalize
+from sklearn.model_selection import train_test_split
+from util import get_audio, normalize, set_audio, denormalize
 
 from keras import backend as K
-from util import get_audio
 from keras.layers import Input, Dense, Dropout, Lambda 
 from keras.layers.normalization import BatchNormalization
 from keras.models import Model
@@ -13,7 +12,8 @@ from keras.callbacks import ModelCheckpoint
 from keras import optimizers
 from keras.losses import binary_crossentropy, mse
 
-song = '/home/ksooklall/Music/wav/intro_x.wav'
+name = 'intro_x'
+song = '/home/ksooklall/Music/wav/{}.wav'.format(name)
 
 
 def preprocessing(X, shape=[96, 16]):
@@ -86,12 +86,19 @@ input_shape = (original_dim, )
 intermediate_dim = 128
 batch_size = 64
 latent_dim = 32
-epochs = 100
-learning_rate = 0.001
+epochs = 10
+learning_rate = 0.002
 
-X = normalize(data)
+# training parameters
+sample_rate = 50
+
+X, X_max, X_min = normalize(data)
+import pdb; pdb.set_trace()
 X = X.reshape(16751, original_dim)
-model, encoder, decoder, z_log_var, z_mean, outputs, inputs = vae(X)
+
+X_train, X_test = train_test_split(X, test_size=0.1)
+
+model, encoder, decoder, z_log_var, z_mean, outputs, inputs = vae(X_train)
 
 # compute the average MSE error, then scale it up, ie. simply sum on all axes
 #reconstruction_loss = binary_crossentropy(inputs, outputs) #starting loss 200
@@ -108,6 +115,11 @@ optimizer = optimizers.Adam(lr=learning_rate, beta_1=0.9, beta_2=0.999, epsilon=
 
 model.compile(optimizer=optimizer)
 
-checkpoint = ModelCheckpoint(filepath='x_best_weight.hdf5', verbose=1, save_best_only=True)
-history = model.fit(X, batch_size=batch_size, epochs=epochs, callbacks=[checkpoint])
+#checkpoint = ModelCheckpoint(filepath='x_best_weight.hdf5', verbose=1, save_best_only=True)
+
+for epoch in range(epochs):
+	history = model.fit(X_train, batch_size=batch_size, epochs=sample_rate)
+	pred = model.predict(X_test)
+	pred = denormalize(pred, X_max, X_min).flatten()
+	set_audio('{}_{}_epoch.wav'.format(name, epoch), rate, pred)
 import pdb; pdb.set_trace()
