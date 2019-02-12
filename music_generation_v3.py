@@ -1,14 +1,14 @@
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-from util import get_audio, normalize, set_audio, denormalize
+from util import get_audio, normalize, set_audio, denormalize, slice_data
 
 from keras import backend as K
 from keras.layers import Input, Dense, Dropout, Lambda 
 from keras.layers.normalization import BatchNormalization
 from keras.models import Model
 from keras.utils import plot_model
-from keras.callbacks import ModelCheckpoint
+from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau
 from keras import optimizers
 from keras.losses import binary_crossentropy, mse
 
@@ -79,24 +79,26 @@ def vae_loss(input_img, output):
 
 # Preprocessing parameters
 rate, data = get_audio(song)
+pct = 0.8
+data = slice_data(data, pct=pct)
+set_audio(name + '_' + str(pct) + '.wav', rate, data)
 
 # network parameters
-original_dim = 337
+original_dim =206 
 input_shape = (original_dim, )
-intermediate_dim = 128
+intermediate_dim = 256
 batch_size = 64
-latent_dim = 32
-epochs = 10
+latent_dim = 38 
+epochs = 50
 learning_rate = 0.002
 
 # training parameters
 sample_rate = 50
 
 X, X_max, X_min = normalize(data)
-import pdb; pdb.set_trace()
-X = X.reshape(16751, original_dim)
-
-X_train, X_test = train_test_split(X, test_size=0.1)
+X = X.reshape(16442, original_dim)
+X_train = X
+#X_train, X_test = train_test_split(X, test_size=0)
 
 model, encoder, decoder, z_log_var, z_mean, outputs, inputs = vae(X_train)
 
@@ -110,6 +112,8 @@ kl_loss = - 0.5 * K.sum(1 + z_log_var - K.square(z_mean) - K.square(K.exp(z_log_
 # return the average loss over all images in batch
 vae_loss = K.mean(reconstruction_loss + kl_loss)    
 
+# Compile
+reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.2, patience=5, min_lr=0.001)
 model.add_loss(vae_loss)
 optimizer = optimizers.Adam(lr=learning_rate, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
 
@@ -117,9 +121,12 @@ model.compile(optimizer=optimizer)
 
 #checkpoint = ModelCheckpoint(filepath='x_best_weight.hdf5', verbose=1, save_best_only=True)
 
-for epoch in range(epochs):
-	history = model.fit(X_train, batch_size=batch_size, epochs=sample_rate)
-	pred = model.predict(X_test)
-	pred = denormalize(pred, X_max, X_min).flatten()
-	set_audio('{}_{}_epoch.wav'.format(name, epoch), rate, pred)
-import pdb; pdb.set_trace()
+#for epoch in range(epochs):
+history = model.fit(X_train, batch_size=batch_size, epochs=epochs)
+
+# Predicting
+pred = model.predict(X[10000: 15000], batch_size=20)
+
+pred = denormalize(pred, X_max, X_min).flatten()
+set_audio('{}_{}_epoch.wav'.format(name, pct), rate, pred)
+

@@ -1,4 +1,5 @@
 import numpy as np
+from functools import reduce
 from scipy.io.wavfile import read, write
 from pydub import AudioSegment
 
@@ -17,6 +18,7 @@ def denormalize(n, X_max, X_min):
 	Denormalizes X to not be normal
 	"""
 	return n * (X_max - X_min) + X_min
+
 
 def get_audio(filename):
 	"""
@@ -37,18 +39,6 @@ def set_audio(filename, rate, data):
 	write(filename, rate, data)
 	return 0
 
-def get_training_data(fn, f_size, f_shift):
-	# f_size -> batch_size
-	sr, sd = get_audio(fn)
-	X_train = []
-	base = 0
-	n = int((len(sd) - f_size) / float(f_shift))
-	while len(X_train) < 10000:
-			X_train.append(sd[base: base+f_size])
-			base += f_shift
-	X_train = np.array(X_train)
-	return sr, X_train
-
 
 def convert_mp3_to_wav(mp3_file):
 	"""
@@ -57,3 +47,36 @@ def convert_mp3_to_wav(mp3_file):
 	sound = AudioSegment.from_mp3(mp3_file)
 	sound.export('{}.wav'.format(mp3_file.split('.')[-1]), sound)
 	return 0
+
+
+def slice_data(data, pct=1):
+	"""
+	Samples from data between start and end, or a certain pct starting from the center
+	and moving out in a (PCT - 0.5) radius
+	"""
+	if pct > 1:
+		raise "Percent must be less than 1"
+
+	length = data.shape[0]
+	start = int(length * (1 - pct))
+	end = int(length * pct)
+	return data[start:end]
+
+
+def factors(n):    
+	#https://stackoverflow.com/questions/6800193/what-is-the-most-efficient-way-of-finding-all-the-factors-of-a-number-in-python
+    return set(reduce(list.__add__, 
+                ([i, n//i] for i in range(1, int(n**0.5) + 1) if n % i == 0)))
+
+
+def batch_data(data, rows=96, colos=96):
+	"""
+	Reshapes data [-1, rows, cols]
+	"""
+	if data.shape[0] % (rows * cols) == 0:
+		return data.reshape(-1, rows, cols)
+	X = []
+	batch = rows * cols
+	for i in range(0, len(data)/ batch, batch):
+		X.append(data[i: i + batch].reshape(rows, cols))
+	return np.array(X)

@@ -5,6 +5,10 @@ Python uses wav files
 	youtube-dl -f bestaudio --extract-audio --audio-format mp3 --audio-quality 0 <Video-URL>
 	youtube-dl -f bestaudio --extract-audio --audio-format wav --audio-quality 0 <Video-URL>
 
+TODO:
+	analyze left and right channels of audio 2D (taki_taki)
+	
+
 Pretrained models:
 	https://github.com/hindupuravinash/the-gan-zoo
 
@@ -33,3 +37,5 @@ Currently working off this:
 	https://blog.keras.io/building-autoencoders-in-keras.html
 try building to:
 	https://github.com/HackerPoet/Composer
+
+Wav files are 2-D (left channel, right channel)
