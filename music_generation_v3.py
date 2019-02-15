@@ -86,7 +86,7 @@ set_audio(name + '_' + str(pct) + '.wav', rate, data)
 # network parameters
 original_dim =206 
 input_shape = (original_dim, )
-intermediate_dim = 256
+intermediate_dim =512 
 batch_size = 64
 latent_dim = 38 
 epochs = 50
